@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+
+<body>
+  <canvas id="game" width="1200" height="500"></canvas>
+  <script src="https://cdn.jsdelivr.net/npm/three/build/three.min.js"></script>
+  <script src="SimpleCubes.js"></script>
+
+  <script>
+    const canvas = document.getElementById("game");
+    SimpleCubes.start(canvas);
+
+    SimpleCubes.background("#88aaff");
+
+    let cube = SimpleCubes.createCube({
+      x: 0, y: 0, z: 0,
+      width: 2, height: 2, length: 2,
+      color: "#ffffff",
+      physics: true
+    });
+
+    let cube2 = SimpleCubes.createCube({
+      x: 10, y: 0, z: 0,
+      width: 2, height: 2, length: 2,
+      color: "#444444",
+      physics: true
+    });
+
+    SimpleCubes.camera.follow(cube);
+
+    function loop() {
+      if (SimpleCubes.keyPressed("w")){
+        cube.velocityZ = -0.1;
+      }else if (SimpleCubes.keyPressed("s")){
+      cube.velocityZ = 0.1;
+      }else{
+        cube.velocityZ = 0;
+      }
+      if (SimpleCubes.keyPressed("a")){
+        cube.velocityX = -0.1;
+      }else if (SimpleCubes.keyPressed("d")){
+      cube.velocityX = 0.1;
+      }else{
+        cube.velocityX = 0;
+      }
+      if (SimpleCubes.keyPressed("Shift")){
+        cube.velocityY = -0.1;
+      }else if (SimpleCubes.keyPressed(" ")){
+      cube.velocityY = 0.1;
+      }else{
+        cube.velocityY = 0;
+      }
+
+      requestAnimationFrame(loop);
+    }
+    loop();
+  </script>
+
+</body>
+
+</html>
