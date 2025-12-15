@@ -32,7 +32,8 @@
       physics: true
     });
 
-    SimpleCubes.camera.follow(cube);
+    cube.setTexture("crate.png")
+    cube2.setOpacity(0.5)
 
     function loop() {
       if (SimpleCubes.keyPressed("w")){
@@ -56,6 +57,9 @@
       }else{
         cube.velocityY = 0;
       }
+
+      SimpleCubes.camera.position([cube.position.x,cube.position.y+2,cube.position.z+8])
+      SimpleCubes.camera.rotation([-20,0,0])
 
       requestAnimationFrame(loop);
     }

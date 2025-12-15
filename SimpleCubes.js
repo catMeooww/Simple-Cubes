@@ -69,6 +69,11 @@ window.SimpleCubes = (function () {
       cube.material.color = new THREE.Color(c);
     };
 
+    cube.setOpacity = function (value) {
+      this.material.transparent = true;
+      this.material.opacity = Math.max(0, Math.min(1, value));
+    };
+
     cube.setTexture = url => {
       const loader = new THREE.TextureLoader();
       loader.load(url, tex => {
@@ -90,6 +95,17 @@ window.SimpleCubes = (function () {
     },
     lookAt(target) {
       camera.userData.lookAt = target;
+    },
+    position(pos) {
+      camera.position.x = pos[0];
+      camera.position.y = pos[1];
+      camera.position.z = pos[2];
+    },
+    rotation(rot) {
+      const deg = d => d * Math.PI / 180;
+      camera.rotation.x = deg(rot[0]);
+      camera.rotation.y = deg(rot[1]);
+      camera.rotation.z = deg(rot[2]);
     }
   };
 
@@ -108,70 +124,70 @@ window.SimpleCubes = (function () {
 
   function testCollision(a, dt = 1) {
 
-  if (!a.physics) return;
+    if (!a.physics) return;
 
-  const ax = a.size.x / 2;
-  const ay = a.size.y / 2;
-  const az = a.size.z / 2;
+    const ax = a.size.x / 2;
+    const ay = a.size.y / 2;
+    const az = a.size.z / 2;
 
-  cubes.forEach(b => {
-    if (!b.physics || b === a) return;
-  });
+    cubes.forEach(b => {
+      if (!b.physics || b === a) return;
+    });
 
-  // ---------- X ----------
-  a.position.x += a.velocityX * dt;
+    // ---------- X ----------
+    a.position.x += a.velocityX * dt;
 
-  cubes.forEach(b => {
-    if (!b.physics || b === a) return;
+    cubes.forEach(b => {
+      if (!b.physics || b === a) return;
 
-    if (
-      overlap(a.position.x - ax, a.position.x + ax, b.position.x - b.size.x/2, b.position.x + b.size.x/2) &&
-      overlap(a.position.y - ay, a.position.y + ay, b.position.y - b.size.y/2, b.position.y + b.size.y/2) &&
-      overlap(a.position.z - az, a.position.z + az, b.position.z - b.size.z/2, b.position.z + b.size.z/2)
-    ) {
-      a.position.x = a.velocityX > 0
-        ? b.position.x - b.size.x/2 - ax
-        : b.position.x + b.size.x/2 + ax;
-      a.velocityX = 0;
-    }
-  });
+      if (
+        overlap(a.position.x - ax, a.position.x + ax, b.position.x - b.size.x / 2, b.position.x + b.size.x / 2) &&
+        overlap(a.position.y - ay, a.position.y + ay, b.position.y - b.size.y / 2, b.position.y + b.size.y / 2) &&
+        overlap(a.position.z - az, a.position.z + az, b.position.z - b.size.z / 2, b.position.z + b.size.z / 2)
+      ) {
+        a.position.x = a.velocityX > 0
+          ? b.position.x - b.size.x / 2 - ax
+          : b.position.x + b.size.x / 2 + ax;
+        a.velocityX = 0;
+      }
+    });
 
-  // ---------- Y ----------
-  a.position.y += a.velocityY * dt;
+    // ---------- Y ----------
+    a.position.y += a.velocityY * dt;
 
-  cubes.forEach(b => {
-    if (!b.physics || b === a) return;
+    cubes.forEach(b => {
+      if (!b.physics || b === a) return;
 
-    if (
-      overlap(a.position.x - ax, a.position.x + ax, b.position.x - b.size.x/2, b.position.x + b.size.x/2) &&
-      overlap(a.position.y - ay, a.position.y + ay, b.position.y - b.size.y/2, b.position.y + b.size.y/2) &&
-      overlap(a.position.z - az, a.position.z + az, b.position.z - b.size.z/2, b.position.z + b.size.z/2)
-    ) {
-      a.position.y = a.velocityY > 0
-        ? b.position.y - b.size.y/2 - ay
-        : b.position.y + b.size.y/2 + ay;
-      a.velocityY = 0;
-    }
-  });
+      if (
+        overlap(a.position.x - ax, a.position.x + ax, b.position.x - b.size.x / 2, b.position.x + b.size.x / 2) &&
+        overlap(a.position.y - ay, a.position.y + ay, b.position.y - b.size.y / 2, b.position.y + b.size.y / 2) &&
+        overlap(a.position.z - az, a.position.z + az, b.position.z - b.size.z / 2, b.position.z + b.size.z / 2)
+      ) {
+        a.position.y = a.velocityY > 0
+          ? b.position.y - b.size.y / 2 - ay
+          : b.position.y + b.size.y / 2 + ay;
+        a.velocityY = 0;
+      }
+    });
 
-  // ---------- Z ----------
-  a.position.z += a.velocityZ * dt;
+    // ---------- Z ----------
+    a.position.z += a.velocityZ * dt;
 
-  cubes.forEach(b => {
-    if (!b.physics || b === a) return;
+    cubes.forEach(b => {
+      if (!b.physics || b === a) return;
 
-    if (
-      overlap(a.position.x - ax, a.position.x + ax, b.position.x - b.size.x/2, b.position.x + b.size.x/2) &&
-      overlap(a.position.y - ay, a.position.y + ay, b.position.y - b.size.y/2, b.position.y + b.size.y/2) &&
-      overlap(a.position.z - az, a.position.z + az, b.position.z - b.size.z/2, b.position.z + b.size.z/2)
-    ) {
-      a.position.z = a.velocityZ > 0
-        ? b.position.z - b.size.z/2 - az
-        : b.position.z + b.size.z/2 + az;
-      a.velocityZ = 0;
-    }
-  });
-}
+      if (
+        overlap(a.position.x - ax, a.position.x + ax, b.position.x - b.size.x / 2, b.position.x + b.size.x / 2) &&
+        overlap(a.position.y - ay, a.position.y + ay, b.position.y - b.size.y / 2, b.position.y + b.size.y / 2) &&
+        overlap(a.position.z - az, a.position.z + az, b.position.z - b.size.z / 2, b.position.z + b.size.z / 2)
+      ) {
+        a.position.z = a.velocityZ > 0
+          ? b.position.z - b.size.z / 2 - az
+          : b.position.z + b.size.z / 2 + az;
+        a.velocityZ = 0;
+      }
+    });
+  }
 
 
 
