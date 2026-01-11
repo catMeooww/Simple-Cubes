@@ -4,68 +4,137 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Document</title>
+  <title>Simple Cubes - Simple 3D design</title>
+  <script src="https://cdn.jsdelivr.net/npm/three/build/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/examples/js/loaders/OBJLoader.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/examples/js/loaders/MTLLoader.js"></script>
+  <script src="SimpleCubes.js"></script>
+  <style>
+    body {
+      text-align: center;
+      background-color: aliceblue;
+      margin: 0px;
+    }
+
+    .header {
+      position: fixed;
+      top: 0px;
+      left: 0px;
+      width: 100%;
+      background-color: #222222;
+      height: 40px;
+    }
+
+    a {
+      color: white;
+      font-weight: bold;
+      font-size: 30px;
+      text-decoration: none;
+      padding: 10px;
+    }
+
+    a:hover {
+      color: aqua;
+    }
+
+    #controls {
+      width: 1335px;
+      height: 200px;
+      justify-self: center;
+      justify-content: center;
+      align-items: center;
+      padding: 5px;
+      background-color: #222222;
+      display: flex;
+    }
+
+    #controls div {
+      display: block;
+      height: 90%;
+      padding: 5px;
+      border: 1px aliceblue solid;
+      color: aliceblue;
+    }
+
+    .code-snippet{
+      background-color: black;
+      color:white;
+      width: 90%;
+      padding: 2px;
+      border: 1px green solid;
+    }
+  </style>
 </head>
 
 <body>
-  <canvas id="game" width="1200" height="500"></canvas>
-  <script src="https://cdn.jsdelivr.net/npm/three/build/three.min.js"></script>
-  <script src="SimpleCubes.js"></script>
+  <div class="header">
+    <a href="#show">Simple Cubes</a>
+    <a href="#docs">Documentation</a>
+    <a href="https://github.com/catMeooww/Simple-Cubes/blob/main/SimpleCubes.js">Git Hub</a>
+  </div>
 
-  <script>
-    const canvas = document.getElementById("game");
-    SimpleCubes.start(canvas);
-
-    SimpleCubes.background("#88aaff");
-
-    let cube = SimpleCubes.createCube({
-      x: 0, y: 0, z: 0,
-      width: 2, height: 2, length: 2,
-      color: "#ffffff",
-      physics: true
-    });
-
-    let cube2 = SimpleCubes.createCube({
-      x: 10, y: 0, z: 0,
-      width: 2, height: 2, length: 2,
-      color: "#444444",
-      physics: true
-    });
-
-    cube.setTexture("crate.png")
-    cube2.setOpacity(0.5)
-
-    function loop() {
-      if (SimpleCubes.keyPressed("w")){
-        cube.velocityZ = -0.1;
-      }else if (SimpleCubes.keyPressed("s")){
-      cube.velocityZ = 0.1;
-      }else{
-        cube.velocityZ = 0;
-      }
-      if (SimpleCubes.keyPressed("a")){
-        cube.velocityX = -0.1;
-      }else if (SimpleCubes.keyPressed("d")){
-      cube.velocityX = 0.1;
-      }else{
-        cube.velocityX = 0;
-      }
-      if (SimpleCubes.keyPressed("Shift")){
-        cube.velocityY = -0.1;
-      }else if (SimpleCubes.keyPressed(" ")){
-      cube.velocityY = 0.1;
-      }else{
-        cube.velocityY = 0;
-      }
-
-      SimpleCubes.camera.position([cube.position.x,cube.position.y+2,cube.position.z+8])
-      SimpleCubes.camera.rotation([-20,0,0])
-
-      requestAnimationFrame(loop);
-    }
-    loop();
-  </script>
-
+  <br>
+  <canvas id="show" width="1340" height="500"></canvas>
+  <div id="controls">
+    <button onclick="firstCube()"
+      style="width: 90%;height: 20%;color:white;background-color: green;font-size: 20px;cursor: pointer;">Add First
+      Cube</button>
+  </div>
+  <br>
+  <div id="docs">
+    <h1>Simple Cubes - A library for easily create 3D worlds</h1>
+    <p>With Simple Cubes it is possible to create cubes, add physics to them, specify color, texture, opacity and also
+      load .obj with .mtl on it</p>
+    <p>Most of this is AI generated, may be unstable</p>
+    <p>Requires THREE to work:</p>
+    <input value="<script src='https://cdn.jsdelivr.net/npm/three/build/three.min.js'></script>" class="code-snippet">
+    <p>For custom OBJ models add THREE addons:</p>
+    <input value="<script src='https://cdn.jsdelivr.net/npm/three@0.132.2/examples/js/loaders/OBJLoader.js'></script>" class="code-snippet">
+    <input value="<script src='https://cdn.jsdelivr.net/npm/three@0.132.2/examples/js/loaders/MTLLoader.js'></script>" class="code-snippet">
+    <p>Also, do not forgot to import SimpleCubes itself:</p>
+    <input value="<script src='SimpleCubes.js'></script>" class="code-snippet">
+    <h2>Initialization</h2>
+    <p>To start developing in 3D, is necessary to create a canvas in HTML:</p>
+    <input value="<canvas id='show' width='1340' height='500'></canvas>" class="code-snippet">
+    <p>Them pass it to the start function:</p>
+    <input value="SimpleCubes.start(document.getElementById('show'));" class="code-snippet">
+    <p>Also, a loop function is required to work, inside of it is necessary to request animation frame:</p>
+    <input value="requestAnimationFrame(loop_function);" class="code-snippet">
+    <h2>First Cubes</h2>
+    <p>Call SimpleCubes function to create a cube passing the necessary information to it</p>
+    <p>Simple example of a cube with physics:</p>
+    <input value="cube = SimpleCubes.createCube({x: 0, y: -10, z: 0,width: 100, height: 2, length: 100,color: '#aaaaaa',physics: true});" class="code-snippet">
+    <p>Cube details can be changed:</p>
+    <input value="cube.setColor('#ffffff')" class="code-snippet">
+    <input value="cube.setOpacity(0.5)" class="code-snippet">
+    <input value="cube.setTexture('./file.png')" class="code-snippet">
+    <p>Cube can be moved!</p>
+    <input value="cube.velocityX = 0.1;" class="code-snippet">
+    <input value="cube.velocityY = 0.1;" class="code-snippet">
+    <input value="cube.velocityZ = 0.1;" class="code-snippet">
+    <p>If cube has physics and find another physics cube, velocity will set to 0</p>
+    <h2>Follow Cubes</h2>
+    <p>Camera functions can be used to track a cube!</p>
+    <p>Use lookAt or follow cube functions</p>
+    <input value="SimpleCubes.camera.follow(cube)" class="code-snippet">
+    <p>or manually set camera to cube position</p>
+    <input value="SimpleCubes.camera.position([cube.position.x, cube.position.y + 2, cube.position.z + 8])" class="code-snippet">
+    <h2>Cube Functionallities</h2>
+    <p>It is possible to detect cube overlapping using:</p>
+    <input value="SimpleCubes.isTouching(cube, cube2)" class="code-snippet">
+    <p>Call function when clicking in a cube using onClick when create cube:</p>
+    <input value="cube = SimpleCubes.createCube({...,onClick(){...}});" class="code-snippet">
+    <p>Load 3D.obj models inside a cube when creating it:</p>
+    <input value="cube = SimpleCubes.createCube({...,model:'./model.obj',mtl:'./mesh.mtl'});" class="code-snippet">
+    <h2>Final Considerations</h2>
+    <p>Use this cubes to create wonderful things like games, interactive apresentations, etc</p>
+    <p>As said before, it uses the THREE library and most SimpleCubes was chatGPT generated</p>
+    <p>Access github files to understand better this library</p>
+    <p>Download also on github as:</p>
+    <input value="SimpleCubes.js" class="code-snippet">
+    <hr><br>
+  </div>
+  <script src="main.js"></script>
 </body>
 
 </html>

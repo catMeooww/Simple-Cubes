@@ -1,5 +1,5 @@
-// SimpleCubes-THREE.js
-// requires THREE via <script src="https://cdn.jsdelivr.net/npm/three/build/three.min.js"></script>
+// SimpleCubes.js Library
+// requires THREE.js
 
 window.SimpleCubes = (function () {
 
@@ -21,6 +21,8 @@ window.SimpleCubes = (function () {
       1000
     );
     camera.position.set(0, 2, 6);
+
+    scene.add(new THREE.AmbientLight(0xffffff, 1));
 
     animate();
     window.addEventListener("keydown", e => keys[e.key] = true);
@@ -59,11 +61,78 @@ window.SimpleCubes = (function () {
     cube.velocityZ = 0;
 
     cube.physics = opts.physics;
+    cube.userData.onClick = opts.onClick;
+
+    if (opts.model && opts.mtl) {
+      const mtlLoader = new THREE.MTLLoader();
+      mtlLoader.load(opts.mtl, (materials) => {
+        materials.preload();
+
+        const objLoader = new THREE.OBJLoader();
+        objLoader.setMaterials(materials);
+        objLoader.load(opts.model, (model) => {
+          model.position.set(opts.x, opts.y, opts.z);
+          model.scale.set(opts.width / 150, opts.width / 150, opts.width / 150);
+          cube.userData.model = model;
+          scene.add(model);
+        });
+      });
+    } else if (opts.model) {
+      const loader = new THREE.OBJLoader();
+      loader.load(opts.model, (model) => {
+        model.position.set(opts.x, opts.y, opts.z);
+        model.scale.set(opts.width / 150, opts.width / 150, opts.width / 150);
+        model.traverse((child) => {
+          if (child.isMesh) {
+            child.material = new THREE.MeshStandardMaterial({
+              color: opts.color
+            });
+          }
+        });
+        cube.userData.model = model;
+        scene.add(model);
+      });
+    }
 
     // ADD METHODS ---------------------------
-    cube.rotateX = v => cube.rotation.x += THREE.MathUtils.degToRad(v);
-    cube.rotateY = v => cube.rotation.y += THREE.MathUtils.degToRad(v);
-    cube.rotateZ = v => cube.rotation.z += THREE.MathUtils.degToRad(v);
+    cube.setPosition = function (x, y, z) {
+      cube.position.set(x, y, z);
+      if (opts.model) {
+        cube.userData.model.position.set(x, y, z)
+      }
+    }
+
+    cube.setRotation = function(x,y,z){
+      cube.rotation.x = THREE.MathUtils.degToRad(x);
+      cube.rotation.y = THREE.MathUtils.degToRad(y);
+      cube.rotation.z = THREE.MathUtils.degToRad(z);
+      if(opts.model){
+        cube.userData.model.rotation.x = THREE.MathUtils.degToRad(x);
+        cube.userData.model.rotation.y = THREE.MathUtils.degToRad(y);
+        cube.userData.model.rotation.z = THREE.MathUtils.degToRad(z);
+      }
+    }
+
+    cube.rotate = function(x,y,z) {
+      cube.rotation.x += THREE.MathUtils.degToRad(x);
+      cube.rotation.y += THREE.MathUtils.degToRad(y);
+      cube.rotation.z += THREE.MathUtils.degToRad(z);
+      if(opts.model){
+        cube.userData.model.rotation.x += THREE.MathUtils.degToRad(x);
+        cube.userData.model.rotation.y += THREE.MathUtils.degToRad(y);
+        cube.userData.model.rotation.z += THREE.MathUtils.degToRad(z);
+      }
+    }
+
+    cube.translate = function (x, y, z) {
+      moveX = cube.position.x + x;
+      moveY = cube.position.y + y;
+      moveZ = cube.position.z + z;
+      cube.position.set(moveX, moveY, moveZ);
+      if (opts.model) {
+        cube.userData.model.position.set(moveX, moveY, moveZ)
+      }
+    }
 
     cube.setColor = c => {
       cube.material.color = new THREE.Color(c);
@@ -86,7 +155,6 @@ window.SimpleCubes = (function () {
     scene.add(cube);
     return cube;
   }
-
 
   // CAMERA ------------------------------------------------------
   const cameraControl = {
@@ -196,11 +264,10 @@ window.SimpleCubes = (function () {
 
     cubes.forEach(c => {
       if (c.physics) {
+        c.translate(0, 0, 0)
         testCollision(c)
       } else {
-        c.position.x += c.velocityX;
-        c.position.y += c.velocityY;
-        c.position.z += c.velocityZ;
+        c.translate(c.velocityX, c.velocityY, c.velocityZ);
       }
     });
 
@@ -222,6 +289,36 @@ window.SimpleCubes = (function () {
     renderer.render(scene, camera);
   }
 
+  //extra utilities
+  function isTouching(a, b) {
+    const ax = a.size.x / 2;
+    const ay = a.size.y / 2;
+    const az = a.size.z / 2;
+    return (overlap(a.position.x - ax, a.position.x + ax, b.position.x - b.size.x / 2, b.position.x + b.size.x / 2) &&
+      overlap(a.position.y - ay, a.position.y + ay, b.position.y - b.size.y / 2, b.position.y + b.size.y / 2) &&
+      overlap(a.position.z - az, a.position.z + az, b.position.z - b.size.z / 2, b.position.z + b.size.z / 2))
+  }
+
+  const raycaster = new THREE.Raycaster();
+  const mouse = new THREE.Vector2();
+
+  window.addEventListener("click", (e) => {
+    mouse.x = (e.clientX / canvas.width) * 2 - 1;
+    mouse.y = -(e.clientY / canvas.height) * 2 + 1;
+
+    raycaster.setFromCamera(mouse, camera);
+
+    const hits = raycaster.intersectObjects(cubes);
+
+    if (hits.length === 0) return;
+
+    const cube = hits[0].object;
+
+    if (cube.userData.onClick) {
+      cube.userData.onClick(cube);
+    }
+  });
+
 
   // RETURN PUBLIC API
   return {
@@ -229,7 +326,8 @@ window.SimpleCubes = (function () {
     background,
     createCube,
     camera: cameraControl,
-    keyPressed
+    keyPressed,
+    isTouching
   };
 
 })();
